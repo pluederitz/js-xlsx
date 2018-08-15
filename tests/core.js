@@ -381,6 +381,23 @@ function check_comments(wb) {
 	assert.equal(get_cell(ws3,"B2").c[0].t, '');
 }
 
+// --- bug report - start ---
+describe('bug-reports', function() {
+  it('XLSX should parse date correctly also if value has a preceding space', function() {
+    var wb = X.read(
+      '7,  2018-03-24',
+      {cellDates: false, dateNF: 'yyyy-mm-dd', type:'string'}
+    );
+    var ws = wb.Sheets.Sheet1;
+    var d = X.SSF.parse_date_code(ws.B1.v);
+    assert(d.d === 24); // fails on IE11: 23
+    assert(d.m === 3);
+    assert(d.y === 2018);
+    assert(ws.B1.w === '2018-03-24'); // fails on IE11: '2018-03-23'
+  });
+});
+// --- bug report - end ---
+
 describe('parse options', function() {
 	var html_cell_types = ['s'];
 	var bef = (function() {
