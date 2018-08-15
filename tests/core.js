@@ -381,6 +381,34 @@ function check_comments(wb) {
 	assert.equal(get_cell(ws3,"B2").c[0].t, '');
 }
 
+// --- bug report - start ---
+describe('bug-reports', function() {
+  var html_cell_types = ['s'];
+  var bef = (function() {
+    X = require(modp);
+  });
+  if(typeof before != 'undefined') before(bef);
+  else it('before', bef);
+  function dateToString(date) {
+    return date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
+  }
+  it('with option `cellDates: true` XLSX should parse date correctly (also date before 26th of march 2018)', function() {
+    var wb = X.read(
+      fs.readFileSync('./test_files-bug-report/check-date-bug.xlsx'),
+      {cellDates: true, type: TYPE}
+    );
+    var ws = wb.Sheets['check-date-bug'];
+    assert(dateToString(ws.B46.v) === '2018-6-5'); // work
+    assert(dateToString(ws.B37.v) === '2018-3-27'); // work
+    assert(dateToString(ws.B36.v) === '2018-3-26'); // work
+    assert(dateToString(ws.B35.v) === '2018-3-25'); // fail: '2018-3-24'
+    assert(dateToString(ws.B34.v) === '2018-3-24'); // fail: '2018-3-23'
+    assert(dateToString(ws.B3.v) === '2015-1-1'); // fail: '2014-12-31'
+    assert(dateToString(ws.B2.v) === '2014-1-1'); // fail: '2013-12-31'
+  });
+});
+// --- bug report - end ---
+
 describe('parse options', function() {
 	var html_cell_types = ['s'];
 	var bef = (function() {
